@@ -1,8 +1,24 @@
 #import "FirebaseAnalyticsPlugin.h"
+
+// Debug logging macro
+#define DebugLog(format, ...) NSLog((@"[FirebaseAnalytics] " format), ##__VA_ARGS__)
+
+// Use known Swift bridging headers if available; otherwise forward-declare Swift symbols.
+// It's not possible to import the app-specific "<AppName>-Swift.h" dynamically at compile-time
+// (that header name depends on the product module name), so fall back to forward declarations.
 #if __has_include(<CordovaPluginsStatic/CordovaPluginsStatic-Swift.h>)
     #import <CordovaPluginsStatic/CordovaPluginsStatic-Swift.h>
-#else
+#elif __has_include("OutSystems-Swift.h")
     #import "OutSystems-Swift.h"
+#elif __has_include("TAU_Student-Swift.h")
+    #import "TAU_Student-Swift.h"
+#else
+    // Forward declare Swift classes if bridging header not found
+    @class OSFANLManager;
+    @class OSFANLManagerFactory;
+    @class OSFANLOutputModel;
+    @class OSFANLConsentHelper;
+    @protocol OSFANLManageable;
 #endif
 
 @import AppTrackingTransparency;
@@ -18,12 +34,23 @@
 @implementation FirebaseAnalyticsPlugin
 
 - (void)pluginInitialize {
-    NSLog(@"Starting Firebase Analytics plugin");
-
+    DebugLog(@"Starting Firebase Analytics plugin");
+    
+    // Log bundle and module information at runtime
+    DebugLog(@"Bundle name: %@", [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleName"]);
+    DebugLog(@"Expected Swift header: %@-Swift.h", [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleName"]);
+    
+    // Log available Swift classes
+    DebugLog(@"Checking Swift class availability:");
+    DebugLog(@"OSFANLManager available: %@", NSClassFromString(@"OSFANLManager") ? @"Yes" : @"No");
+    DebugLog(@"OSFANLManagerFactory available: %@", NSClassFromString(@"OSFANLManagerFactory") ? @"Yes" : @"No");
+    
     if(![FIRApp defaultApp]) {
+        DebugLog(@"Configuring Firebase App");
         [FIRApp configure];
     }
     
+    DebugLog(@"Creating analytics manager");
     self.manager = [OSFANLManagerFactory createManager];
 }
 
