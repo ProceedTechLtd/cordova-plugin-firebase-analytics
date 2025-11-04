@@ -1,10 +1,13 @@
-class OSFANLManager {
+import Foundation
+
+@objcMembers public class OSFANLManager: NSObject {
     private let inputTransformer: OSFANLInputTransformable
     private let eventValidator: OSFANLEventValidator
     
-    init(_ inputTransformer: OSFANLInputTransformable, _ eventValidator: OSFANLEventValidator) {
+    @objc public init(_ inputTransformer: OSFANLInputTransformable, _ eventValidator: OSFANLEventValidator) {
         self.inputTransformer = inputTransformer
         self.eventValidator = eventValidator
+        super.init()
     }
 }
 

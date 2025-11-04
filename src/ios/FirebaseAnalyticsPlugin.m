@@ -3,28 +3,17 @@
 // Debug logging macro
 #define DebugLog(format, ...) NSLog((@"[FirebaseAnalytics] " format), ##__VA_ARGS__)
 
-// Get the module name from the main bundle
-#define SWIFT_MODULE_NAME ([[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleName"])
-#define SWIFT_HEADER_NAME(module) module "-Swift.h"
-
-// Log the current module name and generated header
-static void LogModuleInfo(void) {
-    DebugLog(@"Bundle name: %@", SWIFT_MODULE_NAME);
-    DebugLog(@"Generated Swift header name: %@-Swift.h", SWIFT_MODULE_NAME);
-}
-
+// Use known Swift bridging headers if available; otherwise forward-declare Swift symbols.
+// It's not possible to import the app-specific "<AppName>-Swift.h" dynamically at compile-time
+// (that header name depends on the product module name), so fall back to forward declarations.
 #if __has_include(<CordovaPluginsStatic/CordovaPluginsStatic-Swift.h>)
-    DebugLog(@"Using CordovaPluginsStatic-Swift.h");
     #import <CordovaPluginsStatic/CordovaPluginsStatic-Swift.h>
 #elif __has_include("OutSystems-Swift.h")
-    DebugLog(@"Using OutSystems-Swift.h");
     #import "OutSystems-Swift.h"
+#elif __has_include("TAU_Student-Swift.h")
+    #import "TAU_Student-Swift.h"
 #else
-    // Try to import the dynamic header based on the app name
-    DebugLog(@"Attempting to use dynamic Swift header");
-    LogModuleInfo();
-    #import SWIFT_HEADER_NAME(SWIFT_MODULE_NAME)
-    // If import fails, forward declare the required classes
+    // Forward declare Swift classes if bridging header not found
     @class OSFANLManager;
     @class OSFANLManagerFactory;
     @class OSFANLOutputModel;
@@ -48,7 +37,8 @@ static void LogModuleInfo(void) {
     DebugLog(@"Starting Firebase Analytics plugin");
     
     // Log bundle and module information at runtime
-    LogModuleInfo();
+    DebugLog(@"Bundle name: %@", [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleName"]);
+    DebugLog(@"Expected Swift header: %@-Swift.h", [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleName"]);
     
     // Log available Swift classes
     DebugLog(@"Checking Swift class availability:");
