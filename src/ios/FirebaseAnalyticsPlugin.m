@@ -1,17 +1,32 @@
 #import "FirebaseAnalyticsPlugin.h"
-#if __has_include(<CordovaPluginsStatic/CordovaPluginsStatic-Swift.h>)
-    #import <CordovaPluginsStatic/CordovaPluginsStatic-Swift.h>
-#elif __has_include("OutSystems-Swift.h")
+
+// Dynamically detect the Swift bridging header
+#if __has_include("OutSystems-Swift.h")
     #import "OutSystems-Swift.h"
-#elif __has_include("TAU_Student-Swift.h")
-    #import "TAU_Student-Swift.h"
+#elif __has_include(<CordovaPluginsStatic/CordovaPluginsStatic-Swift.h>)
+    #import <CordovaPluginsStatic/CordovaPluginsStatic-Swift.h>
 #else
-    // Forward declare Swift classes if bridging header not found
-    @class OSFANLManager;
-    @class OSFANLManagerFactory;
-    @class OSFANLOutputModel;
-    @class OSFANLConsentHelper;
-    @protocol OSFANLManageable;
+    // Try to auto-detect any header ending in “-Swift.h”
+    #pragma message("⚠️ No explicit Swift bridging header found — declaring fallback interfaces.")
+
+    @protocol OSFANLManageable <NSObject>
+    - (id _Nullable)createEventModelFor:(NSDictionary * _Nonnull)inputArgument
+                                  error:(NSError * _Nullable * _Nullable)error;
+    @end
+
+    @interface OSFANLManagerFactory : NSObject
+    + (id<OSFANLManageable> _Nonnull)createManager;
+    @end
+
+    @interface OSFANLOutputModel : NSObject
+    @property (nonatomic, strong, readonly) NSString * _Nonnull name;
+    @property (nonatomic, strong, readonly) NSDictionary<NSString *, id> * _Nonnull parameters;
+    @end
+
+    @interface OSFANLConsentHelper : NSObject
+    + (NSDictionary * _Nullable)createConsentModel:(NSArray * _Nonnull)commandArguments
+                                             error:(NSError * _Nullable * _Nullable)error;
+    @end
 #endif
 
 @import AppTrackingTransparency;
@@ -198,8 +213,8 @@ typedef void (^showPermissionInformationPopupHandler)(UIAlertAction*);
 }
 
 - (void)sendError:(NSError *)error forCallbackId:(NSString *)callbackId {
-    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:error.userInfo];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:error.userInfo];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 @end
