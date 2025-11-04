@@ -29,7 +29,8 @@ xmlns:android="http://schemas.android.com/apk/res/android"
         <preference name="SWIFT_VERSION" default="5.0" />
         <preference name="ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES" default="YES" />
 
-        <hook type="after_prepare" src="hooks/ios/iOSCopyPreferences.js" />
+    <hook type="after_prepare" src="hooks/ios/iOSCopyPreferences.js" />
+    <hook type="after_prepare" src="hooks/ios/fixXcodeBuildSettings.js" />
 
         <config-file target="config.xml" parent="/*">
             <feature name="FirebaseAnalytics">
