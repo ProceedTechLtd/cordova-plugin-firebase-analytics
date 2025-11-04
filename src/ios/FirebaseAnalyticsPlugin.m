@@ -1,12 +1,30 @@
 #import "FirebaseAnalyticsPlugin.h"
+
+// Debug logging macro
+#define DebugLog(format, ...) NSLog((@"[FirebaseAnalytics] " format), ##__VA_ARGS__)
+
+// Get the module name from the main bundle
+#define SWIFT_MODULE_NAME ([[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleName"])
+#define SWIFT_HEADER_NAME(module) module "-Swift.h"
+
+// Log the current module name and generated header
+static void LogModuleInfo(void) {
+    DebugLog(@"Bundle name: %@", SWIFT_MODULE_NAME);
+    DebugLog(@"Generated Swift header name: %@-Swift.h", SWIFT_MODULE_NAME);
+}
+
 #if __has_include(<CordovaPluginsStatic/CordovaPluginsStatic-Swift.h>)
+    DebugLog(@"Using CordovaPluginsStatic-Swift.h");
     #import <CordovaPluginsStatic/CordovaPluginsStatic-Swift.h>
 #elif __has_include("OutSystems-Swift.h")
+    DebugLog(@"Using OutSystems-Swift.h");
     #import "OutSystems-Swift.h"
-#elif __has_include("TAU_Student-Swift.h")
-    #import "TAU_Student-Swift.h"
 #else
-    // Forward declare Swift classes if bridging header not found
+    // Try to import the dynamic header based on the app name
+    DebugLog(@"Attempting to use dynamic Swift header");
+    LogModuleInfo();
+    #import SWIFT_HEADER_NAME(SWIFT_MODULE_NAME)
+    // If import fails, forward declare the required classes
     @class OSFANLManager;
     @class OSFANLManagerFactory;
     @class OSFANLOutputModel;
@@ -27,12 +45,22 @@
 @implementation FirebaseAnalyticsPlugin
 
 - (void)pluginInitialize {
-    NSLog(@"Starting Firebase Analytics plugin");
-
+    DebugLog(@"Starting Firebase Analytics plugin");
+    
+    // Log bundle and module information at runtime
+    LogModuleInfo();
+    
+    // Log available Swift classes
+    DebugLog(@"Checking Swift class availability:");
+    DebugLog(@"OSFANLManager available: %@", NSClassFromString(@"OSFANLManager") ? @"Yes" : @"No");
+    DebugLog(@"OSFANLManagerFactory available: %@", NSClassFromString(@"OSFANLManagerFactory") ? @"Yes" : @"No");
+    
     if(![FIRApp defaultApp]) {
+        DebugLog(@"Configuring Firebase App");
         [FIRApp configure];
     }
     
+    DebugLog(@"Creating analytics manager");
     self.manager = [OSFANLManagerFactory createManager];
 }
 
