@@ -12,6 +12,10 @@
     #import "OutSystems-Swift.h"
 #elif __has_include("TAU_Student-Swift.h")
     #import "TAU_Student-Swift.h"
+#elif __has_include("My_TAU-Swift.h")
+    #import "My_TAU-Swift.h"
+#elif __has_include("My TAU-Swift.h")
+    #import "My TAU-Swift.h"
 #else
     // Forward declare Swift classes if bridging header not found
     @class OSFANLManager;
