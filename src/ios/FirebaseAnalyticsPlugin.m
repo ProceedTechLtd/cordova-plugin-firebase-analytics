@@ -16,6 +16,8 @@
     #import "My_TAU-Swift.h"
 #elif __has_include("My TAU-Swift.h")
     #import "My TAU-Swift.h"
+#elif __has_include("My TAU-Swift.h")
+    #import "My TAU App-Swift.h"
 #else
     // Forward declare Swift classes if bridging header not found
     @class OSFANLManager;
